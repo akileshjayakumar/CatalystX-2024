@@ -37,7 +37,9 @@ def main():
     col1, col2 = st.columns([1, 2])
 
     with col1:
-        st.title("Multimodal RAG")
+        st.title("AI Tutor Chatbot")
+
+        st.write("This AI tutor chatbot can help you understand and explain homework questions, graphs, plots, charts, and tables. You can upload files or enter a directory path to process multiple files at once. The chatbot will provide explanations and answers to your questions.")
 
         input_method = st.radio("Choose input method:",
                                 ("Upload Files", "Enter Directory Path"))
