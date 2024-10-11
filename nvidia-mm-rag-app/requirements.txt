@@ -100,5 +100,5 @@ toml==0.10.2
 torch==2.4.1
 tqdm==4.66.5
 transformers==4.45.2
-watchdog==5.0.3
+watchdog
 
