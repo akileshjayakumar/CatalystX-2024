@@ -5,11 +5,8 @@ from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core import VectorStoreIndex, StorageContext
 from llama_index.core import Settings
-from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
 from gtts import gTTS
 import tempfile
-import av
-import cv2
 import streamlit as st
 
 # Set the Streamlit page configuration
@@ -36,18 +33,6 @@ def create_index(documents):
     )
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
     return VectorStoreIndex.from_documents(documents, storage_context=storage_context)
-
-# Custom Video Processor for capturing webcam frames
-
-
-class VideoProcessor(VideoProcessorBase):
-    def __init__(self):
-        self.frame = None
-
-    def recv(self, frame):
-        img = frame.to_ndarray(format="bgr24")
-        self.frame = img  # Store the current frame for later access
-        return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 # Text-to-Speech Functionality
 
@@ -77,6 +62,7 @@ def main():
         st.session_state['first_load'] = True
 
     initialize_settings()
+
     # Set font and color customization for dyslexia-friendly UI
     st.markdown("""
         <style>
@@ -91,19 +77,6 @@ def main():
                 padding: 10px;
                 border-radius: 10px;
                 margin-bottom: 10px;
-            }
-            .contrast-button {
-                font-size: 16px;
-                background-color: #000000;
-                color: #ffffff;
-                padding: 10px;
-                border-radius: 5px;
-                border: none;
-                cursor: pointer;
-                margin-top: 10px;
-            }
-            .streamlit-button > button:hover {
-                background-color: #cccccc;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -131,25 +104,15 @@ def main():
                     st.success("Files processed and index created!")
 
         elif input_method == "Take Picture":
-            st.write("Press the button below to take a picture.")
-            webrtc_ctx = webrtc_streamer(
-                key="camera", video_processor_factory=VideoProcessor)
-
-            if st.button("Capture Image", key="capture_image"):
-                if webrtc_ctx and webrtc_ctx.video_processor:
-                    frame = webrtc_ctx.video_processor.frame
-                    if frame is not None:
-                        st.image(frame, channels="BGR",
-                                 caption="Captured Image")
-                        captured_image_path = "captured_image.jpg"
-                        cv2.imwrite(captured_image_path, frame)
-                        with open(captured_image_path, "rb") as img_file:
-                            with st.spinner("Processing captured image..."):
-                                documents = load_multimodal_data([img_file])
-                                st.session_state['index'] = create_index(
-                                    documents)
-                                st.session_state['history'] = []
-                                st.success("Image captured and processed!")
+            # Use camera input to allow users to take a picture directly
+            camera_image = st.camera_input("Take a picture")
+            if camera_image is not None:
+                with st.spinner("Processing captured image..."):
+                    # Convert the image to a suitable format
+                    documents = load_multimodal_data([camera_image])
+                    st.session_state['index'] = create_index(documents)
+                    st.session_state['history'] = []
+                    st.success("Image captured and processed!")
 
     with col2:
         if 'index' in st.session_state:
