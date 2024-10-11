@@ -41,7 +41,8 @@ def process_graph(image_content):
     deplot_description = process_graph_deplot(image_content)
     mixtral = NVIDIA(model_name="meta/llama-3.1-70b-instruct")
     response = mixtral.complete(
-        "Your responsibility is to explain charts. You are an expert in describing the responses of linearized tables into plain English text for LLMs to use. Explain the following linearized table. " + deplot_description)
+        "Your responsibility is to help students, especially those with learning differences such as dyslexia, understand and solve problems from any content they upload, including charts, data tables, or images of their homework. These may contain questions from subjects like English, mathematics, science, calculus, or any topic studied in primary or secondary school. Use simple, step-by-step explanations, breaking down complex information into easily digestible parts. Engage multiple senses by incorporating visual aids, verbal explanations, and, where applicable, assistive technologies like text-to-speech. Encourage problem-solving by providing hints rather than direct answers, using analogies and relatable examples to reinforce concepts. Highlight key points in the explanation, using bold or colored text where helpful. Always be mindful of the specific needs of dyslexic learners by keeping language clear and instructions structured, ensuring they understand the problem and gain confidence in finding solutions."
+        + deplot_description)
     return response.text
 
 
