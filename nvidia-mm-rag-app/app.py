@@ -5,14 +5,12 @@ from llama_index.vector_stores.milvus import MilvusVectorStore
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core import VectorStoreIndex, StorageContext
 from llama_index.core import Settings
-import streamlit as st
-import os
-import cv2
-import numpy as np
 from streamlit_webrtc import webrtc_streamer, VideoProcessorBase
-import av
 from gtts import gTTS
 import tempfile
+import av
+import cv2
+import streamlit as st
 
 # Set the Streamlit page configuration
 st.set_page_config(
