@@ -227,11 +227,26 @@ def display_chat(input_method):
     )
     try:
         if input_method == "Ask Question Directly":
+            query_method = st.radio("Choose input method:", 
+                                    ("Type", "Speak"))
+            
+            if query_method == "Type":
+                user_input = st.chat_input("Enter your query:")
+            
+            elif query_method == "Speak":
+                audio_bytes = audio_recorder()
+                if audio_bytes:
+                    # Write the audio bytes to a file
+                    with st.spinner("Transcribing..."):
+                        webm_file_path = "temp_audio.mp3"
+                        with open(webm_file_path, "wb") as f:
+                            f.write(audio_bytes)
 
-            user_input = st.chat_input("Enter your query:")
-            logging.info(f"User input: {user_input}")
+                        user_input = speech_to_text(webm_file_path)
+                        os.remove(webm_file_path)
 
             if user_input:
+                logging.info(f"User input: {user_input}")
                 with st.chat_message("user"):
                     st.markdown(user_input)
                 st.session_state['history'].append(
@@ -279,6 +294,8 @@ def display_chat(input_method):
             query_method = st.radio("Choose input method:", 
                                     ("Type", "Speak"))
             
+            user_input = None
+
             if query_method == "Type":
                 user_input = st.chat_input("Enter your query:")
             
