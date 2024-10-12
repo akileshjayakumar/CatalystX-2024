@@ -227,6 +227,9 @@ def display_chat(input_method):
     )
     try:
         if input_method == "Ask Question Directly":
+
+            user_input = None
+            
             query_method = st.radio("Choose input method:", 
                                     ("Type", "Speak"))
             
