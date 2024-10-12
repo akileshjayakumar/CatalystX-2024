@@ -7,6 +7,9 @@ import requests
 import logging
 from llama_index.llms.nvidia import NVIDIA
 
+from llama_index.core.query_pipeline import QueryPipeline
+from llama_index.core import PromptTemplate
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,12 +39,46 @@ def is_graph(image_content):
     return any(keyword in res.lower() for keyword in ["graph", "plot", "chart", "table"])
 
 
+# def process_graph(image_content):
+#     """Process a graph image and generate a description."""
+#     deplot_description = process_graph_deplot(image_content)
+#     mixtral = NVIDIA(model_name="meta/llama-3.1-70b-instruct")
+#     response = mixtral.complete("Your responsibility is to help students, especially those with learning differences such as dyslexia, understand and solve problems from any content they upload, including charts, data tables, or images of their homework. These may contain questions from subjects like English, mathematics, science, calculus, or any topic studied in primary or secondary school. Use simple, step-by-step explanations, breaking down complex information into easily digestible parts. Engage multiple senses by incorporating visual aids, verbal explanations, and, where applicable, assistive technologies like text-to-speech. Encourage problem-solving by providing hints rather than direct answers, using analogies and relatable examples to reinforce concepts. Highlight key points in the explanation, using bold or colored text where helpful. Always be mindful of the specific needs of dyslexic learners by keeping language clear and instructions structured, ensuring they understand the problem and gain confidence in finding solutions." + deplot_description)
+#     return response.text
+
 def process_graph(image_content):
     """Process a graph image and generate a description."""
     deplot_description = process_graph_deplot(image_content)
+    # Use LLMChain with a persona/system prompt
     mixtral = NVIDIA(model_name="meta/llama-3.1-70b-instruct")
-    response = mixtral.complete("Your responsibility is to help students, especially those with learning differences such as dyslexia, understand and solve problems from any content they upload, including charts, data tables, or images of their homework. These may contain questions from subjects like English, mathematics, science, calculus, or any topic studied in primary or secondary school. Use simple, step-by-step explanations, breaking down complex information into easily digestible parts. Engage multiple senses by incorporating visual aids, verbal explanations, and, where applicable, assistive technologies like text-to-speech. Encourage problem-solving by providing hints rather than direct answers, using analogies and relatable examples to reinforce concepts. Highlight key points in the explanation, using bold or colored text where helpful. Always be mindful of the specific needs of dyslexic learners by keeping language clear and instructions structured, ensuring they understand the problem and gain confidence in finding solutions." + deplot_description)
-    return response.text
+
+    # Define a template that includes the persona/system prompt
+    template = """
+    You are a highly supportive educational assistant. Your responsibility is to help students, especially those with learning differences such as dyslexia, understand and solve problems from any content they upload, including charts, data tables, or images of their homework. Use simple, step-by-step explanations, and provide hints rather than direct answers.
+    Break down big and complicated words into smaller, easier-to-understand words. Use visual aids, verbal explanations, and, where applicable, assistive technologies like text-to-speech. Encourage problem-solving by providing hints rather than direct answers, using analogies and relatable examples to reinforce concepts. Highlight key points in the explanation, using bold or colored text where helpful. Always be mindful of the specific needs of dyslexic learners by keeping language clear and instructions structured, ensuring they understand the problem and gain confidence in finding solutions.
+    
+    Examples of Big Words:
+    - "Photosynthesis" can be broken down into "photo" and "syn" "the" "sis"."
+    - "Hippopotamus" can be broken down into "hippo" and "pot" "a" "mus".
+    - "Metamorphosis" can be broken down into "meta" and "mor" "pho" "sis".
+    - "Thermodynamics" can be broken down into "thermo" and "dy" "na" "mics".
+    - "Electromagnetic" can be broken down into "electro" and "mag" "net" "ic".
+    - "Photosynthesis" can be broken down into "photo" and "syn" "the" "sis".
+    
+    Here is the input content:
+    {deplot_description}
+    
+    Please break down the words in the output as well so that students with dyslexia can read and understand better.
+    """
+    prompt = PromptTemplate(
+        input_variables=["deplot_description"], template=template)
+
+    # Set up the chain with the persona
+    # chain = LLMChain(llm=mixtral, prompt=prompt)
+    p = QueryPipeline(chain=[mixtral, prompt], verbose=True)
+    response = p.run(deplot_description=deplot_description)
+
+    return response
 
 
 # Set up logging configuration if not already set
@@ -69,7 +106,7 @@ def describe_image(image_content):
             "messages": [
                 {
                     "role": "user",
-                    "content": f'Describe what you see in this image. <img src="data:image/png;base64,{image_b64}" />'
+                    "content": f'You are an AI assistant that helps describe images in detail. <img src="data:image/png;base64,{image_b64}" />'
                 }
             ],
             "max_tokens": 1024,

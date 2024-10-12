@@ -11,7 +11,7 @@ import streamlit as st
 
 # Set the Streamlit page configuration
 st.set_page_config(
-    layout="wide", page_title="AI Tutor Chatbot", page_icon="🧠")
+    layout="wide", page_title="EduX | AI Tutor", page_icon="🧠")
 
 # Initialize LLM and other settings
 
@@ -86,7 +86,7 @@ def main():
 
     # Left panel for input method selection
     with col1:
-        st.title("🧠 AI Tutor Chatbot")
+        st.title("🧠 EduX")
         st.write("This AI tutor chatbot can help you understand and explain homework questions, graphs, plots, charts, and tables. You can upload files or take a picture to process them, and then the chatbot will provide easy-to-understand answers.")
 
         # Input method options
