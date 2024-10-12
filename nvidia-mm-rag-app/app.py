@@ -11,6 +11,9 @@ from llama_index.llms.nvidia import NVIDIA
 from gtts import gTTS
 import tempfile
 from load_images import load_multimodal_data
+from stt.stt import speech_to_text
+from audio_recorder_streamlit import audio_recorder
+
 
 # Set up logging for the terminal
 logging.basicConfig(level=logging.INFO,
@@ -272,8 +275,26 @@ def display_chat(input_method):
             logging.info("Using document index for query.")
             query_engine = st.session_state['index'].as_query_engine(
                 similarity_top_k=20, streaming=True)
+            
+            query_method = st.radio("Choose input method:", 
+                                    ("Type", "Speak"))
+            
+            if query_method == "Type":
+                user_input = st.chat_input("Enter your query:")
+            
+            elif query_method == "Speak":
+                audio_bytes = audio_recorder()
+                if audio_bytes:
+                    # Write the audio bytes to a file
+                    with st.spinner("Transcribing..."):
+                        webm_file_path = "temp_audio.mp3"
+                        with open(webm_file_path, "wb") as f:
+                            f.write(audio_bytes)
 
-            user_input = st.chat_input("Enter your query:")
+                        user_input = speech_to_text(webm_file_path)
+                        os.remove(webm_file_path)
+
+
             logging.info(f"User input: {user_input}")
 
             if user_input:
