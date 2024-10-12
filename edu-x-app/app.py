@@ -229,13 +229,13 @@ def display_chat(input_method):
         if input_method == "Ask Question Directly":
 
             user_input = None
-            
-            query_method = st.radio("Choose input method:", 
+
+            query_method = st.radio("Choose input method:",
                                     ("Type", "Speak"))
-            
+
             if query_method == "Type":
                 user_input = st.chat_input("Enter your query:")
-            
+
             elif query_method == "Speak":
                 audio_bytes = audio_recorder()
                 if audio_bytes:
@@ -293,15 +293,15 @@ def display_chat(input_method):
             logging.info("Using document index for query.")
             query_engine = st.session_state['index'].as_query_engine(
                 similarity_top_k=20, streaming=True)
-            
-            query_method = st.radio("Choose input method:", 
+
+            query_method = st.radio("Choose input method:",
                                     ("Type", "Speak"))
-            
+
             user_input = None
 
             if query_method == "Type":
                 user_input = st.chat_input("Enter your query:")
-            
+
             elif query_method == "Speak":
                 audio_bytes = audio_recorder()
                 if audio_bytes:
@@ -313,7 +313,6 @@ def display_chat(input_method):
 
                         user_input = speech_to_text(webm_file_path)
                         os.remove(webm_file_path)
-
 
             logging.info(f"User input: {user_input}")
 
